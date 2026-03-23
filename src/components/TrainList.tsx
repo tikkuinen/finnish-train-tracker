@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getRunningTrains, Train } from '../services/trainService.ts';
+import { getRunningTrains, Train } from '../services/trainService';
 import TrainCard from './TrainCard';
 import './TrainList.css';
 

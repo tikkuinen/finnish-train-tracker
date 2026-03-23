@@ -1,6 +1,6 @@
 import React from 'react';
-import TrainList from './components/TrainList';
-import './App.css';
+import './App.css'
+import TrainList from './components/TrainList'
 
 function App() {
   return (

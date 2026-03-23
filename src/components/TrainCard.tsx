@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Train, TrainLocation } from '../services/trainService.ts';
-import { getTrainLocations } from '../services/trainService.ts'
+import { Train, TrainLocation } from '../services/trainService';
+import { getTrainLocations } from '../services/trainService'
 import './TrainCard.css';
 
 interface TrainCardProps {
