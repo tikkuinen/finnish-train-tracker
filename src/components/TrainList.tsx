@@ -14,6 +14,7 @@ const TrainList: React.FC = () => {
     setError(null);
     try {
       const data = await getRunningTrains();
+      console.log('Fetched trains:', data);
       setTrains(data);
       setLastUpdated(new Date());
     } catch (err) {
@@ -37,7 +38,7 @@ const TrainList: React.FC = () => {
   return (
     <div className="train-list-container">
       <div className="header">
-        <h1>🚂 Finnish Train Tracker</h1>
+        <h1>Matkalla olevat junat</h1>
         <div className="controls">
           <button
             onClick={fetchTrains}
@@ -57,12 +58,12 @@ const TrainList: React.FC = () => {
       {error && <div className="error-message">{error}</div>}
 
       <div className="stats">
-        <p>Total running trains: <strong>{trains.length}</strong></p>
+        <p>Junien määrä: <strong>{trains.length}</strong></p>
       </div>
 
       <div className="train-grid">
         {trains.length === 0 && !loading ? (
-          <p className="no-trains">No trains currently running</p>
+          <p className="no-trains">Yhtään junaa ei kulje</p>
         ) : (
           trains.map((train) => (
             <TrainCard key={`${train.departureDate}-${train.trainNumber}`} train={train} />

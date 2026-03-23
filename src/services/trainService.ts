@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const API_BASE_URL = 'https://rata.digitraffic.fi/api/v1';
 
@@ -35,27 +35,34 @@ export interface Train {
 }
 
 // Fetch all currently running trains
-export const getAllTrains = async (): Promise<Train[]> => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/trains`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching trains:', error);
-    throw error;
-  }
-};
+// export const getAllTrains = async (): Promise<Train[]> => {
+//   try {
+//     const response = await axios.get(`${API_BASE_URL}/trains`);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching trains:', error);
+//     throw error;
+//   }
+// };
 
-// Fetch trains running only
+
 export const getRunningTrains = async (): Promise<Train[]> => {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const url = `${API_BASE_URL}/trains`;
+
+  //console.log('[getRunningTrains] URL', url);
   try {
-    const response = await axios.get(`${API_BASE_URL}/trains`, {
-      params: {
-        'only-running': true,
-      },
-    });
-    return response.data;
+    const res = await axios.get<Train[]>(url);
+    //console.log('[getRunningTrains] OK', res.status, 'count', res.data.length);
+    return res.data;
   } catch (error) {
-    console.error('Error fetching running trains:', error);
+    const axiosErr = error as AxiosError;
+    console.error('[getRunningTrains] failed', {
+      message: axiosErr.message,
+      status: axiosErr.response?.status,
+      data: axiosErr.response?.data,
+      headers: axiosErr.response?.headers,
+    });
     throw error;
   }
 };

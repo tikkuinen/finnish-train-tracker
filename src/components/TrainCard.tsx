@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Train, TrainLocation } from '../services/trainService';
-import { getTrainLocations } from '../services/trainService'
-import './TrainCard.css';
+import React, { useEffect, useState } from 'react';
+import { Train, TrainLocation, getTrainLocations } from '../services/trainService';
 
 interface TrainCardProps {
   train: Train;
@@ -16,30 +14,34 @@ const TrainCard: React.FC<TrainCardProps> = ({ train }) => {
     const fetchLocation = async () => {
       setLoadingLocation(true);
       try {
-        const locations = await getTrainLocations(train.trainNumber);
-        if (locations && locations.length > 0) {
-          setLocation(locations[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching location:', error);
+        const locs = await getTrainLocations(train.trainNumber);
+        setLocation(locs?.[0] ?? null);
+      } catch (err) {
+        console.error('Error loading train location:', err);
       } finally {
         setLoadingLocation(false);
       }
     };
-
     fetchLocation();
   }, [train.trainNumber]);
 
+  const loc = location ?? train.trainLocations?.[0] ?? null;
+  const hasCoords =
+    loc?.latitude !== undefined &&
+    loc?.longitude !== undefined &&
+    !Number.isNaN(loc.latitude) &&
+    !Number.isNaN(loc.longitude);
+
   const getTrainTypeDisplay = (trainType: string) => {
     const typeMap: Record<string, string> = {
-      'IC': '🚄 InterCity',
-      'IR': '🚆 InterRegional',
-      'RE': '🚂 Regional Express',
-      'S': '🚆 Suburban',
-      'P': '🚂 Passenger',
-      'SP': '🚂 Special',
-      'H': '🚂 Freight',
-      'HV': '🚂 Freight',
+      'IC': 'InterCity',
+      'IR': 'InterRegional',
+      'RE': 'Regional Express',
+      'S': 'Suburban',
+      'P': 'Passenger',
+      'SP': 'Special',
+      'H': 'Freight',
+      'HV': 'Freight',
     };
     return typeMap[trainType] || `${trainType}`;
   };
@@ -50,58 +52,28 @@ const TrainCard: React.FC<TrainCardProps> = ({ train }) => {
 
   return (
     <div className={`train-card ${train.cancelled ? 'cancelled' : ''}`}>
-      <div className="train-header">
-        <div className="train-info">
-          <h3>{getTrainTypeDisplay(train.trainType)} #{train.trainNumber}</h3>
-          <p className="operator">{train.operatorShortCode}</p>
+      <h3>{train.trainNumber} {getTrainTypeDisplay(train.trainType)}</h3>
+      <p>Departure {formatDate(train.departureDate)}</p>
+      <p>Status: {train.cancelled ? 'Cancelled' : train.runningCurrently ? 'Running' : 'Not running'}</p>
+
+      <p>
+        Location:{' '}
+        {hasCoords
+          ? `${loc!.latitude.toFixed(5)}, ${loc!.longitude.toFixed(5)}`
+          : 'Not available'}
+      </p>
+
+      <button onClick={() => setShowDetails(v => !v)}>
+        {showDetails ? 'Hide details' : 'Show details'}
+      </button>
+
+      {loadingLocation && <p>Loading location...</p>}
+      {showDetails && (
+        <div className="details">
+          {/* details */}
+          deets
         </div>
-        <button
-          className="details-btn"
-          onClick={() => setShowDetails(!showDetails)}
-        >
-          {showDetails ? '−' : '+'}
-        </button>
-      </div>
-
-      {train.cancelled && <div className="cancelled-badge">CANCELLED</div>}
-
-      <div className="train-body">
-        <div className="info-row">
-          <span className="label">Date:</span>
-          <span>{formatDate(train.departureDate)}</span>
-        </div>
-
-        {location && (
-          <>
-            <div className="info-row">
-              <span className="label">Location:</span>
-              <span>
-                📍 {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-              </span>
-            </div>
-            <div className="info-row">
-              <span className="label">Speed:</span>
-              <span>⚡ {location.speed} km/h</span>
-            </div>
-            <div className="info-row">
-              <span className="label">Last Update:</span>
-              <span>{new Date(location.timestamp).toLocaleTimeString('fi-FI')}</span>
-            </div>
-          </>
-        )}
-
-        {loadingLocation && <p className="loading-text">Loading location...</p>}
-
-        {showDetails && (
-          <div className="details-section">
-            <p><strong>Train Category:</strong> {train.trainCategory}</p>
-            {train.commuterLineID && (
-              <p><strong>Commuter Line:</strong> {train.commuterLineID}</p>
-            )}
-            <p><strong>Running:</strong> {train.runningCurrently ? '✓ Yes' : '✗ No'}</p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };
